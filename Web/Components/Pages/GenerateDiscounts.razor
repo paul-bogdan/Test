@@ -1,0 +1,58 @@
+﻿@page "/"
+@using Web.Services
+@rendermode InteractiveServer
+@inject IDiscountService DiscountService
+
+<PageTitle>Create Discounts</PageTitle>
+
+<h1>Hi, please generate discounts before you want to use them</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="numberInput">Enter a number between 1 and 2000:</label>
+                <input type="number" class="form-control" id="numberInput" min="1" max="2000" @bind="discountCount"/>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin: 10px">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            <button class="btn btn-primary" disabled="@IsLoading" @onclick="GenerateDiscountsRequest">Generate Discounts</button>
+        </div>
+    </div>
+
+    <div class="row" style="margin: 10px">
+        <div class="col-md-12">
+            <p role="status">@generationMessage</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool IsLoading;
+    private int discountCount;
+    private string generationMessage;
+    private CancellationTokenSource _cancellationTokenSource;
+
+    private async Task GenerateDiscountsRequest()
+    {
+        IsLoading = true;
+        generationMessage = "Generating discounts...";
+        _cancellationTokenSource = new CancellationTokenSource();
+        try
+        {
+            await DiscountService.CreateDiscounts(discountCount, _cancellationTokenSource.Token);
+            generationMessage = "Discounts generated successfully.";
+        }
+        catch (Exception ex)
+        {
+            generationMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}

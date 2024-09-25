@@ -1,0 +1,48 @@
+﻿services:
+  cart.microservice:
+    image: cart.microservice
+    build:
+      context: .
+      dockerfile: Cart.Microservice/Dockerfile
+    ports:
+      - "5002:5002"
+      - "5004:5004"
+  web-sol:
+    image: web
+    build:
+      context: .
+      dockerfile: Web/Dockerfile
+    ports:
+      - "5003:5003"
+  discounts.service:
+    image: discounts.service
+    build:
+      context: .
+      dockerfile: Discounts.Service/Dockerfile
+    ports:
+        - "5001:5001"
+        
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest

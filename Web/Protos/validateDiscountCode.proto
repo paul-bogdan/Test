@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "Discounts.Service";
+
+package validateDiscountCode;
+
+// The greeting service definition.
+service ValidateDiscountCode {
+  // Sends a greeting
+  rpc ValidateCode (ValidateDiscountCodeRequest) returns (ValidateDiscountCodeReply);
+}
+
+// The request message containing the user's name.
+message  ValidateDiscountCodeRequest {
+  string code = 1;
+}
+
+// The response message containing the greetings.
+message  ValidateDiscountCodeReply {
+  bool isValid = 1;
+}

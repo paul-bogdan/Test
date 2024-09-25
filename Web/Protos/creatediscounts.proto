@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "Web";
+
+package creatediscounts;
+
+// The greeting service definition.
+service CreateDiscounts {
+  // Sends a greeting
+  rpc CreateDiscount (CreateDiscountRequest) returns (CreateDiscountReply);
+}
+
+// The request message containing the user's name.
+message CreateDiscountRequest {
+  int32 codesCount = 1;
+}
+
+
+// The response message containing the greetings.
+message CreateDiscountReply {
+}

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "Cart.Microservice";
+
+package saveOrder;
+
+// The request message containing the user ID.
+message SaveOrderRequest {
+  string userId = 1;
+}
+
+// The response message containing the success status and message.
+message SaveOrderResponse {
+  bool isSuccess = 1;
+  string message = 2;
+}
+
+// The order service definition.
+service SaveOrderService {
+  // RPC to save the order.
+  rpc SaveOrder (SaveOrderRequest) returns (SaveOrderResponse);
+}

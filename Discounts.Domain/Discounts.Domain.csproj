@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MassTransit.Abstractions" Version="8.2.5" />
+      <PackageReference Include="MediatR" Version="12.4.1" />
+      <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Cart.Contracts\Cart.Contracts.csproj" />
+      <ProjectReference Include="..\Discounts.Contracts\Discounts.Contracts.csproj" />
+    </ItemGroup>
+
+</Project>

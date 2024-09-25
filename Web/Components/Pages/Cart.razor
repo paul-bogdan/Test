@@ -1,0 +1,206 @@
+﻿@page "/cart"
+@using global::Cart.Contracts
+@using Web.Constants
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Microsoft.AspNetCore.SignalR.Client
+@using Web.Models
+@using Web.Services
+@inject ProtectedSessionStorage ProtectedSessionStorage
+@inject IConfiguration Configuration
+@inject IDiscountService DiscountService
+@inject IOrderService OrderService
+
+<PageTitle>Cart</PageTitle>
+
+<div class="container mt-5">
+    <h1 class="mb-4">Your Shopping Cart</h1>
+
+    @if (isCartSaved)
+    {
+        <button class="btn btn-primary" @onclick="ReinitializeCart">Reinitialize Cart</button>
+    }
+    else if (cart != null)
+    {
+        <div class="card">
+            <div class="card-header">
+                <h2>Cart Summary</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in cart.Items)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.Price.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="mt-4">
+                    <h3>Discounts</h3>
+                    <ul>
+                        @foreach (var discount in cart.Discounts)
+                        {
+                            <li>Code: @discount.DiscountCode, Value: @discount.Value.ToString("F2")</li>
+                        }
+                    </ul>
+                </div>
+                <div class="form-group mt-3">
+                    <label for="discountCodeInput">Enter Discount Code:</label>
+                    <input type="text" class="form-control" id="discountCodeInput" @bind="discountCode"/>
+                </div>
+
+                <p role="status" class="mt-2 text-danger">@validationMessage</p>
+
+                <div class="mt-4">
+                    <h3>Subtotal: @cart.SubTotal.ToString("C")</h3>
+                    <h3>Total: @cart.Total.ToString("C")</h3>
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn btn-primary" @onclick="ApplyDiscount">Apply Discount</button>
+                    <button class="btn btn-danger" @onclick="ResetCart">Reset Cart</button>
+                    <button class="btn btn-success" @onclick="SaveOrder">Save Order</button> <!-- Save Order button -->
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>Loading cart...</p>
+    }
+</div>
+
+@code
+{
+    private string userId = "";
+    private bool isInitialized = false;
+    private HubConnection hubConnection;
+    private CartDto cart;
+    private string discountCode;
+    private string validationMessage;
+    private bool IsLoading;
+    private bool isCartSaved = false; // Flag to track if the cart is saved
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialization logic if needed
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var userToken = await ProtectedSessionStorage.GetAsync<string>(Keys.UserId);
+            if (userToken.Value != null)
+            {
+                userId = userToken.Value;
+            }
+            else
+            {
+                userId = Guid.NewGuid().ToString();
+                await ProtectedSessionStorage.SetAsync(Keys.UserId, userId);
+            }
+            StateHasChanged(); // Notify Blazor to re-render the component
+            await ConnectToHub();
+        }
+    }
+
+    private async Task ConnectToHub()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Configuration["CartServiceUrl"]+"/cartHub?guid=" + userId)
+            .Build();
+
+        hubConnection.On<CartMessage>("ReceiveUpdates", async (message) =>
+        {
+            cart = message.Cart;
+           await InvokeAsync(StateHasChanged);
+        });
+
+        try
+        {
+            await hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task ApplyDiscount()
+    {
+        var response = await DiscountService.AddDiscountToCart(discountCode, userId,CancellationToken.None);
+        if (response.Item1)
+        {
+            validationMessage = "Discount applied!";
+        }
+        else
+        {
+            validationMessage = response.Item2;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ResetCart()
+    {
+        cart = new CartDto(); // Reset the cart to an empty state
+        await InvokeAsync(StateHasChanged);
+
+        await DisposeAsync();
+
+        await ConnectToHub();
+        // Logic to reset the cart
+        // Example: Call an API to reset the cart and update the cart
+
+        validationMessage = "Cart has been reset!";
+
+    }
+
+    private async Task SaveOrder()
+    {
+        var response = await OrderService.SaveOrder(userId, CancellationToken.None);
+        if (response.Item1)
+        {
+            validationMessage = "Order saved successfully!";
+            isCartSaved = true; // Set the flag to true when the cart is saved
+        }
+        else
+        {
+            validationMessage = "Failed to save order.";
+            isCartSaved = false;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ReinitializeCart()
+    {
+        isCartSaved = false; // Reset the flag
+        await ResetCart(); // Reinitialize the cart
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        DisposeAsync().GetAwaiter().GetResult();
+    }
+}

@@ -1,0 +1,48 @@
+﻿@page "/validateCode"
+@using Web.Services
+@rendermode InteractiveServer
+@inject IDiscountService DiscountService
+
+<PageTitle>ValidateCode</PageTitle>
+
+<PageTitle>ValidateCode</PageTitle>
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="text-center">
+        <h1>Validate Code</h1>
+
+        <div class="form-group">
+            <label for="codeInput">Enter Discount Code:</label>
+            <input type="text" class="form-control" id="codeInput" @bind="discountCode"/>
+        </div>
+
+        <button class="btn btn-primary" @onclick="ValidateDiscountCode" disabled="@IsLoading">Validate Code</button>
+
+        <p role="status">@validationMessage</p>
+    </div>
+</div>
+
+@code {
+    private string discountCode;
+    private string validationMessage;
+    private bool IsLoading;
+
+    private async Task ValidateDiscountCode()
+    {
+        IsLoading = true;
+        validationMessage = "Validating...";
+        try
+        {
+            var isValid = await DiscountService.ValidateDiscount(discountCode, CancellationToken.None);
+            validationMessage = isValid ? "Discount code is valid." : "Discount code is invalid.";
+        }
+        catch (Exception ex)
+        {
+            validationMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "Discounts.Service";
+
+package getAllDiscountsCodes;
+
+// The request message containing no parameters.
+message GetAllDiscountCodesRequest {}
+
+// The response message containing a list of discount codes.
+message GetAllDiscountCodesResponse {
+  string code = 1;
+  bool used = 2;
+  string percentage = 3;
+}
+
+// The response message containing a list of GetAllDiscountCodesResponse.
+message GetAllDiscountCodesListResponse {
+  repeated GetAllDiscountCodesResponse discount_codes = 1;
+}
+
+// The discount service definition.
+service GetAllDiscountCodesService {
+  // RPC to get all discount codes.
+  rpc GetAllDiscountCodes (GetAllDiscountCodesRequest) returns (GetAllDiscountCodesListResponse);
+}
