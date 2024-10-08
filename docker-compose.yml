@@ -1,26 +1,26 @@
 ﻿services:
-  cart.microservice:
-    image: cart.microservice
-    build:
-      context: .
-      dockerfile: Cart.Microservice/Dockerfile
-    ports:
-      - "5002:5002"
-      - "5004:5004"
-  web-sol:
-    image: web
-    build:
-      context: .
-      dockerfile: Web/Dockerfile
-    ports:
-      - "5003:5003"
-  discounts.service:
-    image: discounts.service
-    build:
-      context: .
-      dockerfile: Discounts.Service/Dockerfile
-    ports:
-        - "5001:5001"
+#  cart.microservice:
+#    image: cart.microservice
+#    build:
+#      context: .
+#      dockerfile: Cart.Microservice/Dockerfile
+#    ports:
+#      - "5002:5002"
+#      - "5004:5004"
+#  web-sol:
+#    image: web
+#    build:
+#      context: .
+#      dockerfile: Web/Dockerfile
+#    ports:
+#      - "5003:5003"
+#  discounts.service:
+#    image: discounts.service
+#    build:
+#      context: .
+#      dockerfile: Discounts.Service/Dockerfile
+#    ports:
+#        - "5001:5001"
         
   mongodb:
     image: mongo:latest

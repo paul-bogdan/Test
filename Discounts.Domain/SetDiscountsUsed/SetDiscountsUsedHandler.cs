@@ -23,6 +23,7 @@ public class SetDiscountsUsedHandler : IRequestHandler<SetDiscountsUsedCommand, 
         var discounts = await _dbContext.Discounts
             .Find(filter)
             .ToListAsync(cancellationToken);
+        
         foreach (var discount in discounts)
         {
             discount.Used = true;

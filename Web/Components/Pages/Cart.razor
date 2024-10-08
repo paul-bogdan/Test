@@ -140,14 +140,21 @@
 
     private async Task ApplyDiscount()
     {
-        var response = await DiscountService.AddDiscountToCart(discountCode, userId,CancellationToken.None);
-        if (response.Item1)
+        try
         {
-            validationMessage = "Discount applied!";
+            var response = await DiscountService.AddDiscountToCart(discountCode, userId, CancellationToken.None);
+            if (response.Item1)
+            {
+                validationMessage = "Discount applied!";
+            }
+            else
+            {
+                validationMessage = response.Item2;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            validationMessage = response.Item2;
+            validationMessage = ex.Message;
         }
 
         await InvokeAsync(StateHasChanged);
